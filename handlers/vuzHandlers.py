@@ -1,25 +1,23 @@
-from aiogram.filters import CommandStart, Text, StateFilter
+from aiogram.filters import Text, StateFilter
 from aiogram import Router
-from aiogram.types import Message, CallbackQuery
-from aiogram.fsm.state import default_state
-from aiogram.fsm.storage.redis import RedisStorage, Redis
+from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
-import lexicon
 from FSM.FSMdefault import FSMSnils
-from filters.filters import text_in_vuz
+from keyboards import CompKeyboards
 from lexicon import vuzes
-from keyboards import kb
-import re
 
 router: Router = Router()
-router.message.filter(text_in_vuz)
+router.message.filter(StateFilter(FSMSnils.choose_vuz))
 
 
 @router.message(Text(text=vuzes[0]))
-async def first_vuz_check_comp(message: Message):
-    await message.answer(text='Пожалуйста подождите некоторое время...')
-    await message.answer(text='Выберите факультет для просмотра', reply_markup=kb.mirea_kb())
+async def first_vuz_check_comp(message: Message, state: FSMContext):
+    await state.set_state(FSMSnils.choose_comp)
+    await state.update_data(kb='МИРЭА')
+    await message.answer(
+        text='Выберите факультет для просмотра\n<b>Если хотите выбрать сразу несколько и добавить их в избранное введите команду /favourite </b>',
+        reply_markup=CompKeyboards('МИРЭА').get_kb())
 
 
 @router.message(Text(text=vuzes[1]))
