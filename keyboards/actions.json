@@ -2,5 +2,9 @@
   {
     "text": "МИРЭА",
     "func": "mirea_kb"
+  },
+  {
+    "text": "МАИ",
+    "func": "mai_kb"
   }
 ]

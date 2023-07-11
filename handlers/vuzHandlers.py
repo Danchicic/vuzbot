@@ -1,4 +1,4 @@
-from aiogram.filters import Text, StateFilter
+from aiogram.filters import StateFilter
 from aiogram import Router
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
@@ -11,20 +11,10 @@ router: Router = Router()
 router.message.filter(StateFilter(FSMSnils.choose_vuz))
 
 
-@router.message(Text(text=vuzes[0]))
+@router.message()
 async def first_vuz_check_comp(message: Message, state: FSMContext):
     await state.set_state(FSMSnils.choose_comp)
-    await state.update_data(kb='МИРЭА')
+    await state.update_data(kb=message.text)
     await message.answer(
         text='Выберите факультет для просмотра\n<b>Если хотите выбрать сразу несколько и добавить их в избранное введите команду /favourite </b>',
-        reply_markup=CompKeyboards('МИРЭА').get_kb())
-
-
-@router.message(Text(text=vuzes[1]))
-async def id_func(message: Message):
-    pass
-
-
-@router.message(Text(text=vuzes[2]))
-async def id_func(message: Message):
-    pass
+        reply_markup=CompKeyboards(message.text).get_kb())

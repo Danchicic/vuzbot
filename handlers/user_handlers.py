@@ -12,6 +12,7 @@ router: Router = Router()
 
 @router.message(CommandStart())
 async def start_command(message: Message, state: FSMContext):
+    await state.clear()
     await state.set_state(FSMSnils.snils)
     await message.answer(text=lexicon_ru['start'])
 
