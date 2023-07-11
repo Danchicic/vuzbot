@@ -7,7 +7,7 @@ import re
 from selenium.webdriver.common.by import By
 
 
-def get_page(url: str) -> tuple[dict, dict]:
+def get_page(url: str) -> tuple[dict, dict, str]:
     headers: dict = {
         "user-agent": fake_useragent.UserAgent().random,
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
@@ -16,10 +16,13 @@ def get_page(url: str) -> tuple[dict, dict]:
     page = requests.get(url=url, headers=headers).text
     # with open('index.html', 'w+') as f:
     #     f.write(page)
-
+    #
     # with open('index.html') as f:
     #     src = f.read()
+    #     page = src
     page = BeautifulSoup(page, 'lxml')
+    budget = page.find_all('p')[1].text
+
     table = page.find_all('tr')
     students = {}
     for student in table[1:]:
@@ -29,7 +32,7 @@ def get_page(url: str) -> tuple[dict, dict]:
 
         students[original_id] = int(priority), mark
 
-    return students, dict(sorted(students.items(), key=lambda x: x[1][0]))
+    return students, dict(sorted(students.items(), key=lambda x: x[1][0])), budget
 
 
 def get_comp() -> dict[str, str]:
@@ -68,7 +71,7 @@ def get_comp() -> dict[str, str]:
 
 
 def main() -> None:
-    print(get_comp())
+    get_page('https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition=1748205428624334134')
 
 
 if __name__ == '__main__':
