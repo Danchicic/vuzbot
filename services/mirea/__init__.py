@@ -1,3 +1,4 @@
+import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import fake_useragent
@@ -6,42 +7,32 @@ import re
 from selenium.webdriver.common.by import By
 
 
-def get_page(url: str, headers: dict) -> list:
-    """
-    Get the web page content and extract relevant information about students.
+def get_page(url: str) -> tuple[dict, dict]:
+    headers: dict = {
+        "user-agent": fake_useragent.UserAgent().random,
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
+    }
 
-    Args:
-        url (str): The URL of the web page.
-        headers (dict): Headers for the HTTP request.
-
-    Returns:
-        list: A list of tuples containing the priority and mark of each student.
-
-    """
-    # Fetch the web page content
-    # page = requests.get(url=url, headers=headers).text
+    page = requests.get(url=url, headers=headers).text
     # with open('index.html', 'w+') as f:
     #     f.write(page)
 
-    # Read the saved HTML file
-    with open('index.html') as f:
-        src = f.read()
-
-    # Parse the HTML using BeautifulSoup
-    page = BeautifulSoup(src, 'lxml')
+    # with open('index.html') as f:
+    #     src = f.read()
+    page = BeautifulSoup(page, 'lxml')
     table = page.find_all('tr')
-    students = []
-    for student in table:
+    students = {}
+    for student in table[1:]:
         original_id = student.find(class_='fio').text.strip()
         priority = student.find(class_='accepted').text.strip()
         mark = student.find_all(class_='sum')[-1].text.strip()
 
-        students.append((original_id, priority, mark))
+        students[original_id] = int(priority), mark
 
-    return students[1:]
+    return students, dict(sorted(students.items(), key=lambda x: x[1][0]))
 
 
-def get_comp() -> list[str]:
+def get_comp() -> dict[str, str]:
     url = 'https://priem.mirea.ru/accepted-entrants-list/'
     user = fake_useragent.UserAgent().random
     options = webdriver.ChromeOptions()
@@ -49,33 +40,35 @@ def get_comp() -> list[str]:
     options.add_argument("--headless")
     driver = webdriver.Chrome(options=options)
     competitions = []
+    hrefs = []
     try:
         driver.get(url=url)
-        # time.sleep(6)
-        competitions = []
-        competitions_web = driver.find_elements(By.CLASS_NAME, 'compType')
+        competitions_web = driver.find_elements(By.CLASS_NAME, 'npsTitle')
+        srcs = driver.find_elements(By.CLASS_NAME, 'rowCommon')
+        for src in srcs:
+            hrefs.append(src.find_element(By.CLASS_NAME, 'showListingBtn').get_property('href'))
         for comp in competitions_web:
-            if re.match(r"\d{2}\.\d{2}\.\d{2}", comp.text.strip().split()[0]):
-                competitions.append(comp.text)
+            # comp = comp.find_element(By.CLASS_NAME, 'compType')
+
+            compets = comp.find_elements(By.TAG_NAME, 'td')
+            for com in compets:
+                if com.text.strip().split() != [] and re.match(r"\d{2}\.\d{2}\.\d{2}", com.text.strip().split()[0]):
+                    competitions.append(f"{comp.text.split()[0]}\n{com.text.split()[-1]}")
+                    continue
+                if com.text == 'только платные места':
+                    competitions.pop(-1)
+
     except Exception as ex:
         print(ex)
-    return competitions
+    finally:
+        driver.close()
+        driver.quit()
+
+    return dict(zip(competitions, hrefs))
 
 
 def main() -> None:
-    get_comp()
-    '''url: str = 'https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition=1748205436693126454&prior=any&documentType=any&accepted=0&acceptedEntrant=any&onlyActive=1&onlyPaid=0'
-
-    headers: dict = {
-        "user-agent": fake_useragent.UserAgent().random,
-        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-    }
-
-    """
-    Main function to call and print the results of `get_page()`.
-
-    """
-    print(get_page(url=url, headers=headers))'''
+    print(get_comp())
 
 
 if __name__ == '__main__':

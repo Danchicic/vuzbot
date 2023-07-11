@@ -5,6 +5,7 @@ from aiogram.fsm.state import default_state
 from aiogram.fsm.storage.redis import RedisStorage, Redis
 from aiogram.fsm.context import FSMContext
 from FSM.FSMdefault import FSMSnils
+from filters.filters import text_in_vuz
 
 from lexicon import lexicon_ru
 from keyboards import kb
@@ -25,8 +26,7 @@ async def id_func(message: Message, state: FSMContext):
     if re.match(r"^\d{3}-\d{3}-\d{3}-\d{2}$", message.text):
         await state.update_data(snils=message.text)
         await message.answer(text=lexicon_ru['snils_correct'], reply_markup=kb.vuzkb())
-        await state.clear()
+        await state.set_state(FSMSnils.choose_comp)
+
     else:
         await message.answer(text=lexicon_ru['snils_uncorrect'])
-
-

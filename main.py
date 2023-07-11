@@ -3,7 +3,7 @@ import logging
 from aiogram.fsm.storage.redis import RedisStorage, Redis
 from aiogram import Bot, Dispatcher
 from config.config import Config, load_config
-from handlers import user_handlers
+from handlers import user_handlers, vuzHandlers, competitioHandlers
 from keyboards import kb
 
 # Инициализируем логгер
@@ -31,9 +31,10 @@ async def main():
     redis: Redis = Redis(host='localhost')
     storage: RedisStorage = RedisStorage(redis=redis)
 
-    dp: Dispatcher = Dispatcher()
-
+    dp: Dispatcher = Dispatcher(storage=storage)
+    dp.include_router(vuzHandlers.router)
     dp.include_router(user_handlers.router)
+    dp.include_router(competitioHandlers.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
