@@ -1,20 +1,24 @@
+from typing import Type
+
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import fake_useragent
 import re
 from selenium.webdriver.common.by import By
+from type_hint import Competitions, StructureForBot
 
 
-def get_mirea_page(url: str) -> tuple[dict, dict, str]:
+def get_mirea_page(url: str) -> Type[StructureForBot]:
     headers: dict = {
         "user-agent": fake_useragent.UserAgent().random,
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
     }
+    """"""
+    page = requests.get(url=url, headers=headers, params={'accepted': 1}).text
+    with open('index.html', 'w+') as f:
+        f.write(page)
 
-    page = requests.get(url=url, headers=headers).text
-    # with open('index.html', 'w+') as f:
-    #     f.write(page)
     #
     # with open('index.html') as f:
     #     src = f.read()
@@ -30,11 +34,13 @@ def get_mirea_page(url: str) -> tuple[dict, dict, str]:
         mark = student.find_all(class_='sum')[-1].text.strip()
 
         students[original_id] = int(priority), mark
+    StructureForBot.students = students
+    StructureForBot.sorted_students = dict(sorted(students.items(), key=lambda x: x[1][0]))
+    StructureForBot.budget = budget
+    return StructureForBot
 
-    return students, dict(sorted(students.items(), key=lambda x: x[1][0])), budget
 
-
-def get_comp() -> dict[str, str]:
+def get_mirea_comp() -> Type[Competitions]:
     url = 'https://priem.mirea.ru/accepted-entrants-list/'
     user = fake_useragent.UserAgent().random
     options = webdriver.ChromeOptions()
@@ -66,12 +72,14 @@ def get_comp() -> dict[str, str]:
         driver.close()
         driver.quit()
 
-    return dict(zip(competitions, hrefs))
+    Competitions.competitions = dict(zip(competitions, hrefs))
+    return Competitions
 
 
 def main() -> None:
-    get_mirea_page(
-        'https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition=1748205428624334134')
+    # print(get_mirea_page(
+    #     'https://priem.mirea.ru/accepted-entrants-list/personal_code_rating.php?competition=1748205428624334134').students)
+    print(get_mirea_comp().competitions)
 
 
 if __name__ == '__main__':

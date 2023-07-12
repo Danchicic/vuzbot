@@ -5,7 +5,6 @@ from aiogram.fsm.context import FSMContext
 
 from FSM.FSMdefault import FSMSnils
 from keyboards import CompKeyboards
-from lexicon import vuzes
 
 router: Router = Router()
 router.message.filter(StateFilter(FSMSnils.choose_vuz))

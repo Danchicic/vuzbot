@@ -1,6 +1,6 @@
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from lexicon import vuzes, competitions_mirea, competitions_mai
+from lexicon import vuzes, competitions_mirea
 import json
 
 
@@ -20,14 +20,14 @@ class CompKeyboards:
     @staticmethod
     def mirea_kb() -> ReplyKeyboardMarkup:
         builder = ReplyKeyboardBuilder()
-        buttons: list[KeyboardButton] = [KeyboardButton(text=comp) for comp in competitions_mirea]
+        buttons: list[KeyboardButton] = [KeyboardButton(text=comp) for comp in competitions_mirea.competitions]
         builder.row(*buttons, width=4)
         return builder.as_markup(resize_keyboard=True, one_time_keyboard=True)
 
     @staticmethod
-    def mai_kb() -> ReplyKeyboardMarkup:
+    def mei_kb() -> ReplyKeyboardMarkup:
         builder = ReplyKeyboardBuilder()
-        buttons: list[KeyboardButton] = [KeyboardButton(text=comp) for comp in competitions_mai]
+        buttons: list[KeyboardButton] = [KeyboardButton(text=comp) for comp in competitions_mei.competitions]
         builder.row(*buttons, width=4)
         return builder.as_markup(resize_keyboard=True, one_time_keyboard=True)
 
