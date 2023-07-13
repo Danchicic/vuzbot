@@ -7,6 +7,8 @@ async def set_main_menu(bot: Bot):
         BotCommand(command='snils', description='Изменить снилс'),
         BotCommand(command='vuz', description='Изменить ВУЗ'),
         BotCommand(command='competition', description='Изменить факультет'),
-        BotCommand(command='favourite', description='**Посмотреть все свои факультеты')
+        BotCommand(command='change_mark', description='Изменить свой балл'),
+        BotCommand(command='favourite', description='**Посмотреть все свои факультеты'),
+
     ]
     await bot.set_my_commands(main_menu_commands)

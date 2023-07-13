@@ -2,8 +2,10 @@ import asyncio
 import logging
 from aiogram.fsm.storage.redis import RedisStorage, Redis
 from aiogram import Bot, Dispatcher
+
+import handlers
+from handlers import second_FSM_handlers
 from config.config import Config, load_config
-from handlers import user_handlers, vuzHandlers, competitioHandlers
 from keyboards.main_menu import set_main_menu
 
 # Инициализируем логгер
@@ -34,9 +36,8 @@ async def main():
     dp: Dispatcher = Dispatcher(storage=storage)
     dp.startup.register(set_main_menu)
 
-    dp.include_router(vuzHandlers.router)
-    dp.include_router(user_handlers.router)
-    dp.include_router(competitioHandlers.router)
+    dp.include_router(handlers.main_router)
+    # dp.include_router(second_FSM_handlers.favourite_router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
